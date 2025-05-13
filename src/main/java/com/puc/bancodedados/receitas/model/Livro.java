@@ -36,6 +36,6 @@ public class Livro {
     @JoinColumn(name = "editor_rg", nullable = false)
     private Editor editor;
 
-    @OneToMany(mappedBy = "livro", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "livro", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private Set<ReceitaLivro> receitaLivros = new HashSet<>();
 }

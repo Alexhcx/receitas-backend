@@ -29,19 +29,20 @@ public class EditorService {
     @Transactional
     public EditorResponseDTO criarEditor(EditorRequestDTO requestDTO) {
         Empregado empregado = empregadoRepository.findById(requestDTO.editorRg())
-                .orElseThrow(() -> new EntityNotFoundException("Empregado com RG '" + requestDTO.editorRg() + "' não encontrado para associar ao editor."));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Empregado com RG '" + requestDTO.editorRg() + "' não encontrado para associar ao editor."));
 
         if (editorRepository.existsById(requestDTO.editorRg())) {
             throw new IllegalArgumentException("Editor com RG '" + requestDTO.editorRg() + "' já existe.");
         }
         Editor editor = new Editor();
         editor.setEmpregado(empregado);
+        editor.setDtContrato(requestDTO.dtContrato());
 
         Editor editorSalvo = editorRepository.save(editor);
 
         return mapToResponseDTO(editorSalvo);
     }
-
 
     @Transactional(readOnly = true)
     public List<EditorResponseDTO> listarEditores() {
@@ -58,6 +59,21 @@ public class EditorService {
     }
 
     @Transactional
+    public EditorResponseDTO atualizarEditor(Long rg, EditorRequestDTO requestDTO) {
+        Editor editorExistente = editorRepository.findById(rg)
+                .orElseThrow(() -> new EntityNotFoundException("Editor não encontrado com RG: " + rg));
+
+        if (!rg.equals(requestDTO.editorRg())) {
+            throw new IllegalArgumentException("O RG do editor no corpo da requisição (" + requestDTO.editorRg() +
+                    ") não corresponde ao RG na URL (" + rg + ").");
+        }
+
+        editorExistente.setDtContrato(requestDTO.dtContrato());
+        Editor editorAtualizado = editorRepository.save(editorExistente);
+        return mapToResponseDTO(editorAtualizado);
+    }
+
+    @Transactional
     public void deletarEditor(Long rg) {
         Editor editor = editorRepository.findById(rg)
                 .orElseThrow(() -> new EntityNotFoundException("Editor não encontrado com RG: " + rg));
@@ -70,7 +86,7 @@ public class EditorService {
     private EditorResponseDTO mapToResponseDTO(Editor editor) {
         return new EditorResponseDTO(
                 editor.getEditorRg(),
-                editor.getEmpregado() != null ? editor.getEmpregado().getNomeEmpregado() : null
-        );
+                editor.getEmpregado() != null ? editor.getEmpregado().getNomeEmpregado() : null,
+                editor.getDtContrato());
     }
 }

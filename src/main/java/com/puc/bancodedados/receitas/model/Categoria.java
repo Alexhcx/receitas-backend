@@ -29,7 +29,7 @@ public class Categoria {
     @Column(name = "nome_categoria", nullable = false, length = 80)
     private String nomeCategoria;
 
-    @OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "categoria", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     // CascadeType.PERSIST ou MERGE é mais comum aqui para não deletar receitas se categoria for deletada,
     // mas a remoção de Categoria com receitas associadas deve ser tratada com cuidado na lógica de serviço.
     private Set<Receita> receitas = new HashSet<>();

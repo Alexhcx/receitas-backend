@@ -38,6 +38,7 @@ public class CozinheiroService {
         Cozinheiro cozinheiro = new Cozinheiro();
         cozinheiro.setEmpregado(empregado);
         cozinheiro.setNomeFantasia(requestDTO.nomeFantasia());
+        cozinheiro.setDtContrato(requestDTO.dtContrato());
         cozinheiro.setMetaMensalReceitas(requestDTO.metaMensalReceitas());
         cozinheiro.setPrazoInicialDias(requestDTO.prazoInicialDias());
 
@@ -70,6 +71,7 @@ public class CozinheiroService {
                     ") não corresponde ao RG na URL (" + rg + ").");
         }
         cozinheiroExistente.setNomeFantasia(requestDTO.nomeFantasia());
+        cozinheiroExistente.setDtContrato(requestDTO.dtContrato()); // Update dtContrato
         cozinheiroExistente.setMetaMensalReceitas(requestDTO.metaMensalReceitas());
         cozinheiroExistente.setPrazoInicialDias(requestDTO.prazoInicialDias());
 
@@ -93,6 +95,7 @@ public class CozinheiroService {
                 cozinheiro.getCozinheiroRg(),
                 cozinheiro.getEmpregado() != null ? cozinheiro.getEmpregado().getNomeEmpregado() : null,
                 cozinheiro.getNomeFantasia(),
+                cozinheiro.getDtContrato(), // Include dtContrato
                 cozinheiro.getMetaMensalReceitas(),
                 cozinheiro.getPrazoInicialDias()
         );

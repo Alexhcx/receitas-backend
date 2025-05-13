@@ -33,7 +33,7 @@ public class Ingrediente {
     @Column(name = "descricao_ingrediente", nullable = false, length = 200)
     private String descricaoIngrediente;
 
-    @OneToMany(mappedBy = "ingrediente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "ingrediente", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private Set<ReceitaIngrediente> receitaIngredientes = new HashSet<>();
 
     @Override

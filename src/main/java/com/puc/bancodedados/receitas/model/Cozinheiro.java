@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -32,6 +33,9 @@ public class Cozinheiro {
     @Column(name = "nome_fantasia", length = 80)
     private String nomeFantasia;
 
+    @Column(name = "dt_contrato", length = 80)
+    private LocalDate dtContrato;
+
     @NotNull
     @Min(value = 1, message = "Meta mensal de receitas deve ser no mínimo 1")
     @Column(name = "meta_mensal_receitas", nullable = false)
@@ -43,10 +47,10 @@ public class Cozinheiro {
     @Column(name = "prazo_inicial_dias", nullable = false)
     private Integer prazoInicialDias;
 
-    @OneToMany(mappedBy = "cozinheiro", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "cozinheiro", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private Set<Restaurante> restaurantes = new HashSet<>();
 
-    @OneToMany(mappedBy = "cozinheiro", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "cozinheiro", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private Set<Receita> receitas = new HashSet<>();
 
     @Override
