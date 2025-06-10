@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta 3: Cozinheiro Mais Antigo</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; align-items: center; background-color: #f4f4f9; color: #333; margin: 0; padding: 2rem; }
+        .container { background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 800px; }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 2rem; }
+        button { display: block; width: 100%; max-width: 300px; margin: 0 auto; padding: 0.75rem; border: none; background-color: #e67e22; color: white; font-size: 1rem; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; }
+        button:hover { background-color: #d35400; }
+        #results-container { margin-top: 2rem; }
+        .cook-card { border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .cook-card h2 { margin-top: 0; color: #2980b9; }
+        .cook-card p { margin: 0.5rem 0; }
+        .cook-card strong { color: #34495e; }
+        .recipe-list { list-style-type: none; padding-left: 0; }
+        .recipe-item { background: #ecf0f1; padding: 1rem; border-radius: 4px; margin-top: 1rem; }
+        .recipe-item h4 { margin: 0 0 0.5rem 0; }
+        .book-list { list-style-type: disc; padding-left: 20px; margin-top: 0.5rem; }
+        .message { text-align: center; color: #7f8c8d; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Consulta 3: Cozinheiro(s) com Contrato Mais Antigo</h1>
+        
+        <button id="searchBtn">Buscar</button>
+
+        <div id="results-container">
+             <p class="message">Clique no botão para buscar os dados.</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('searchBtn').addEventListener('click', async () => {
+            const resultsContainer = document.getElementById('results-container');
+            resultsContainer.innerHTML = '<p class="message">Buscando...</p>';
+
+            try {
+                const response = await fetch('/api/consultas/cozinheiros-mais-antigos');
+                if (!response.ok) {
+                    throw new Error(`Erro na rede: ${response.statusText}`);
+                }
+                const data = await response.json();
+                renderResults(data);
+            } catch (error) {
+                console.error('Erro ao buscar dados:', error);
+                resultsContainer.innerHTML = `<p class="message error">Não foi possível carregar os dados.</p>`;
+            }
+        });
+
+        function renderResults(data) {
+            const resultsContainer = document.getElementById('results-container');
+            if (!data || data.length === 0) {
+                resultsContainer.innerHTML = '<p class="message">Nenhum cozinheiro encontrado.</p>';
+                return;
+            }
+
+            let cardsHTML = '';
+            data.forEach(cozinheiro => {
+                // Formata a data para o padrão brasileiro
+                const dataContrato = new Date(cozinheiro.dataContrato + 'T00:00:00').toLocaleDateString('pt-BR');
+                
+                const restaurantes = cozinheiro.restaurantes.length > 0 ? cozinheiro.restaurantes.join(', ') : 'Nenhum';
+
+                let receitasHTML = '<p>Nenhuma receita criada.</p>';
+                if (cozinheiro.receitasCriadas.length > 0) {
+                    receitasHTML = '<ul class="recipe-list">';
+                    cozinheiro.receitasCriadas.forEach(receita => {
+                        const dataCriacao = new Date(receita.dataDaCriacao + 'T00:00:00').toLocaleDateString('pt-BR');
+                        const livros = receita.titulosDosLivros.length > 0 
+                            ? `<ul class="book-list">${receita.titulosDosLivros.map(t => `<li>${t}</li>`).join('')}</ul>`
+                            : '<p>Não publicada em livros.</p>';
+
+                        receitasHTML += `
+                            <li class="recipe-item">
+                                <h4>${receita.nomeDaReceita}</h4>
+                                <p><strong>Categoria:</strong> ${receita.categoriaDaReceita}</p>
+                                <p><strong>Data de Criação:</strong> ${dataCriacao}</p>
+                                <p><strong>Publicada nos Livros:</strong></p>
+                                ${livros}
+                            </li>
+                        `;
+                    });
+                    receitasHTML += '</ul>';
+                }
+
+                cardsHTML += `
+                    <div class="cook-card">
+                        <h2>${cozinheiro.nomeCozinheiro}</h2>
+                        <p><strong>Data do Contrato:</strong> ${dataContrato}</p>
+                        <p><strong>Restaurantes:</strong> ${restaurantes}</p>
+                        <h3>Receitas Criadas:</h3>
+                        ${receitasHTML}
+                    </div>
+                `;
+            });
+
+            resultsContainer.innerHTML = cardsHTML;
+        }
+    </script>
+
+</body>
+</html>

@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 
 public record ReceitaRequestDTO(
@@ -16,7 +15,7 @@ public record ReceitaRequestDTO(
         String nomeReceita,
 
         @NotBlank(message = "Descrição do modo de preparo é obrigatória.")
-        String descricaoModoPreparo, // @Lob será na entidade
+        String descricaoModoPreparo,
 
         @NotNull(message = "Data de criação é obrigatória.")
         @PastOrPresent(message = "Data de criação não pode ser futura.")

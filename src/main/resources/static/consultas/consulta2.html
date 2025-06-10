@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta 2: Receitas por Ingrediente</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; align-items: center; background-color: #f4f4f9; color: #333; margin: 0; padding: 2rem; }
+        .container { background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
+        h1 { color: #2c3e50; text-align: center; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: .5rem; font-weight: bold; }
+        input[type="number"] { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { display: block; width: 100%; padding: 0.75rem; border: none; background-color: #27ae60; color: white; font-size: 1rem; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; }
+        button:hover { background-color: #229954; }
+        #results-container { margin-top: 2rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.75rem; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .message { text-align: center; color: #7f8c8d; }
+        .note { font-size: 0.9rem; color: #7f8c8d; text-align: center; margin-top: -1rem; margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Consulta 2: Receitas por Ingrediente</h1>
+        <div class="form-group">
+            <label for="ingredienteIdInput">Digite o ID do Ingrediente:</label>
+            <input type="number" id="ingredienteIdInput" placeholder="Ex: 1" value="1">
+        </div>
+        <p class="note">Dica: Você pode encontrar os IDs dos ingredientes no endpoint <code>/api/ingredientes</code>.</p>
+        <button id="searchBtn">Buscar Receitas</button>
+
+        <div id="results-container">
+            <p class="message">Os resultados da busca aparecerão aqui.</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('searchBtn').addEventListener('click', async () => {
+            const ingredienteId = document.getElementById('ingredienteIdInput').value;
+            const resultsContainer = document.getElementById('results-container');
+            
+            if (!ingredienteId) {
+                resultsContainer.innerHTML = '<p class="message error">Por favor, insira um ID de ingrediente.</p>';
+                return;
+            }
+
+            resultsContainer.innerHTML = '<p class="message">Buscando...</p>';
+
+            try {
+                const response = await fetch(`/api/consultas/receitas-por-ingrediente?ingredienteId=${ingredienteId}`);
+                if (!response.ok) {
+                    throw new Error(`Erro na rede: ${response.statusText}`);
+                }
+                const data = await response.json();
+                renderTable(data);
+            } catch (error) {
+                console.error('Erro ao buscar dados:', error);
+                resultsContainer.innerHTML = `<p class="message error">Não foi possível carregar os dados. Verifique se o ID do ingrediente é válido.</p>`;
+            }
+        });
+
+        function renderTable(data) {
+            const resultsContainer = document.getElementById('results-container');
+            if (!data || data.length === 0) {
+                resultsContainer.innerHTML = '<p class="message">Nenhuma receita encontrada para este ingrediente.</p>';
+                return;
+            }
+
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ingrediente</th>
+                            <th>Categoria</th>
+                            <th>Quantidade de Receitas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            data.forEach(item => {
+                tableHTML += `
+                    <tr>
+                        <td>${item.nomeIngrediente}</td>
+                        <td>${item.nomeCategoria}</td>
+                        <td>${item.quantidadeDeReceitas}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            resultsContainer.innerHTML = tableHTML;
+        }
+    </script>
+
+</body>
+</html>

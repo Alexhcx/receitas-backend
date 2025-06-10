@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta 1: Cozinheiros Campeões</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; align-items: center; background-color: #f4f4f9; color: #333; margin: 0; padding: 2rem; }
+        .container { background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
+        h1 { color: #2c3e50; text-align: center; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: .5rem; font-weight: bold; }
+        input[type="number"] { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { display: block; width: 100%; padding: 0.75rem; border: none; background-color: #3498db; color: white; font-size: 1rem; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; }
+        button:hover { background-color: #2980b9; }
+        #results-container { margin-top: 2rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.75rem; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .message { text-align: center; color: #7f8c8d; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Consulta 1: Cozinheiros Campeões por Ano</h1>
+        <div class="form-group">
+            <label for="anoInput">Digite o Ano:</label>
+            <input type="number" id="anoInput" placeholder="Ex: 2024" value="2024">
+        </div>
+        <button id="searchBtn">Buscar Campeões</button>
+
+        <div id="results-container">
+            <p class="message">Os resultados da busca aparecerão aqui.</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('searchBtn').addEventListener('click', async () => {
+            const ano = document.getElementById('anoInput').value;
+            const resultsContainer = document.getElementById('results-container');
+            
+            if (!ano) {
+                resultsContainer.innerHTML = '<p class="message error">Por favor, insira um ano válido.</p>';
+                return;
+            }
+
+            resultsContainer.innerHTML = '<p class="message">Buscando...</p>';
+
+            try {
+                const response = await fetch(`/api/consultas/cozinheiros-campeoes?ano=${ano}`);
+                if (!response.ok) {
+                    throw new Error(`Erro na rede: ${response.statusText}`);
+                }
+                const data = await response.json();
+
+                renderTable(data);
+
+            } catch (error) {
+                console.error('Erro ao buscar dados:', error);
+                resultsContainer.innerHTML = `<p class="message error">Não foi possível carregar os dados. Verifique o console para mais detalhes.</p>`;
+            }
+        });
+
+        function renderTable(data) {
+            const resultsContainer = document.getElementById('results-container');
+            if (!data || data.length === 0) {
+                resultsContainer.innerHTML = '<p class="message">Nenhum cozinheiro campeão encontrado para este ano.</p>';
+                return;
+            }
+
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome do Cozinheiro</th>
+                            <th>Quantidade de Receitas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(item => {
+                tableHTML += `
+                    <tr>
+                        <td>${item.nomeCozinheiro}</td>
+                        <td>${item.quantidadeDeReceitas}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            resultsContainer.innerHTML = tableHTML;
+        }
+    </script>
+
+</body>
+</html>
